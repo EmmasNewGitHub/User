@@ -61,31 +61,60 @@
       back() {
         this.$router.push("/mine");
       },
-      changepswdBtn() {
-        this.iconstyle = "el-icon-loading";
-        this.disabled = true;
-        this.axios.post("http://localhost:9151/user/updatePassword", {
-          "oldPassword": this.changepswd.old,
-          "newPassword": this.changepswd.new,
-        })
-        .then(res => {
-          this.iconstyle = "el-icon-check";
-          this.btnType = "success";
-          setTimeout(() => {
-            this.disabled = false;
-            this.$router.push("/mine");
-          }, 2000);
-        })
-        .catch(res => {
-          this.iconstyle = "el-icon-close";
-          this.btnType = "danger";
-          setTimeout(() => {
-            this.disabled = false;
-            this.iconstyle = "el-icon-a-032";
-            this.btnType = "primary";
-          }, 2000);
-        })
-      },
+      // changepswdBtn() {
+      //   this.iconstyle = "el-icon-loading";
+      //   this.disabled = true;
+      //   this.axios.post("http://localhost:9151/user/updatePassword", {
+      //     "oldPassword": this.changepswd.old,
+      //     "newPassword": this.changepswd.new,
+      //   })
+      //   .then(res => {
+      //     this.iconstyle = "el-icon-check";
+      //     this.btnType = "success";
+      //     setTimeout(() => {
+      //       this.disabled = false;
+      //       this.$router.push("/mine");
+      //     }, 2000);
+      //   })
+      //   .catch(res => {
+      //     this.iconstyle = "el-icon-close";
+      //     this.btnType = "danger";
+      //     setTimeout(() => {
+      //       this.disabled = false;
+      //       this.iconstyle = "el-icon-a-032";
+      //       this.btnType = "primary";
+      //     }, 2000);
+      //   })
+      // },
+    
+              changepswdBtn() {
+            this.iconstyle = "el-icon-loading";
+            this.disabled = true;
+            this.$http.post("/user/updatePassword", {
+                "oldPassword": this.changepswd.old,
+                "newPassword": this.changepswd.new,
+            })
+            .then(res => {
+                this.iconstyle = "el-icon-check";
+                this.btnType = "success";
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.$router.push("/mine");
+                }, 2000);
+            })
+            .catch(res => {
+                this.iconstyle = "el-icon-close";
+                this.btnType = "danger";
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.iconstyle = "el-icon-a-032";
+                    this.btnType = "primary";
+                }, 2000);
+            });
+        },
+
+    
+    
     },
   }
 </script>

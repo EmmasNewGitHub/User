@@ -126,7 +126,9 @@
     },
     mounted(){
       this.$store.commit("setMine");
-      this.axios.get("http://localhost:9151/user/userDetail")
+      // this.axios.get("http://localhost:9151/user/userDetail")
+      // this..get("http://localhost:9151/user/userDetail")
+      this.$http.get("/user/userDetail") 
       .then(res => {
         this.userinfo = res.data.data;
         console.log(this.userinfo);

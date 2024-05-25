@@ -37,10 +37,6 @@
 
 
 
-
-
-
-
     
   </template>
   <script lang="ts">
@@ -49,23 +45,23 @@
   
   export default defineComponent({
     setup() {
-      const acdata = ref(null); // 使用 ref 创建响应式数据
-  
-      const fetchAcData = async () => {
-        try {
-          const response = await axios.get('http://localhost:9151/user/conditionerBill');
-          if (response.data.code === 200) {
-            acdata.value = response.data.data; // 更新响应式引用的值
-          } else {
-            console.error(`Error fetching data: ${response.data.code}`);
-          }
-        } catch (error) {
-          console.error('Failed to fetch data:', error);
-        }
-      };
-      fetchAcData();
-      return { acdata };
-    },
+  const acdata = ref(null); // 使用 ref 创建响应式数据
+
+  const fetchAcData = async () => {
+    try {
+      const response = await axios.get('/user/conditionerBill');
+      if (response.data.code === 200) {
+        acdata.value = response.data.data; // 更新响应式引用的值
+      } else {
+        console.error(`Error fetching data: ${response.data.code}`);
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+  fetchAcData();
+  return { acdata };
+},
     methods:{
     goback(){
       this.$router.push("/myac");

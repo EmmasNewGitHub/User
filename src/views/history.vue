@@ -105,7 +105,9 @@
       }
     },
     mounted() {
-      this.axios.get("http://localhost:9151/user/historyOrder")
+      // this.axios.get("http://localhost:9151/user/historyOrder")
+      this.$http.get("/user/historyOrder") 
+      // http://localhost:9153/
         .then(res => {
           this.orderdata = res.data.data;
           this.length = this.orderdata.length;

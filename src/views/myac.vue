@@ -1,12 +1,12 @@
 <template>
   <div>
     <h1>空调状态详情</h1>
-
-    
+     <div class="button-container">
     <el-button class="getACDetail" @click="gogetACDetail">
-     获取汇总账单
+        获取汇总账单
     </el-button>
-
+    <el-button @click="goback" type="text" class="order-back">返回</el-button>
+</div>
 
     <div v-if="acData === null || acData.length === 0">
       <p>没有获取到空调数据。</p>
@@ -45,22 +45,37 @@ export default {
     };
   },
   methods: {
+    // fetchAcData() {
+    //   // this.axios.get("http://127.0.0.1:4523/m1/4382405-4026619-default/user/specificBill")
+    //   this.axios.get("http://localhost:9151/user/specificBill") 
+    //   .then(res => {
+    //       if (res.data.code === 200) {
+    //         // if (res.data.code ) {
+    //         this.acData = res.data.data;
+    //       } else {
+    //         this.$message.error(`获取空调数据失败，错误码：${res.data.code}`);
+    //       }
+    //     })
+    //     .catch(error => {
+    //       console.error('请求空调数据失败：', error);
+    //       this.$message.error('请求空调数据失败，请稍后重试');
+    //     });
+    // },
     fetchAcData() {
-      // this.axios.get("http://127.0.0.1:4523/m1/4382405-4026619-default/user/specificBill")
-      this.axios.get("http://localhost:9151/user/specificBill") 
-      .then(res => {
-          if (res.data.code === 200) {
-            // if (res.data.code ) {
-            this.acData = res.data.data;
-          } else {
-            this.$message.error(`获取空调数据失败，错误码：${res.data.code}`);
-          }
-        })
-        .catch(error => {
-          console.error('请求空调数据失败：', error);
-          this.$message.error('请求空调数据失败，请稍后重试');
-        });
-    },
+  this.$http.get("/user/specificBill") // Updated URL
+    .then(res => {
+      if (res.data.code === 200) {
+        this.acData = res.data.data;
+      } else {
+        this.$message.error(`获取空调数据失败，错误码：${res.data.code}`);
+      }
+    })
+    .catch(error => {
+      console.error('请求空调数据失败：', error);
+      this.$message.error('请求空调数据失败，请稍后重试');
+    });
+}
+,
     gogetACDetail(){
       this.$router.push('/ACDetail');
     },
@@ -90,4 +105,13 @@ export default {
 .table th {
   background-color: #eee;
 }
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 */
+    /* height: 100vh; 让容器充满整个视口高度 */
+}
+
+
 </style>

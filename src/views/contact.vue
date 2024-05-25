@@ -67,10 +67,18 @@
         console.log(this.contact);
         this.disabled = true;
         this.iconstyle = "el-icon-loading";
-        this.axios.post("http://localhost:9151/user/publishComment", {
-          "information": this.contact.comment,
-          "type": this.contact.eva,
-        })
+        // this.axios.post("http://localhost:9151/user/publishComment", {
+        //   "information": this.contact.comment,
+        //   "type": this.contact.eva,
+        // })
+        this.$http({
+                    method: 'post',
+                    url: '/user/publishComment',
+                    data: {
+                      information: this.contact.comment,
+                        type: this.contact.eva,
+                    }
+                })
         .then(res => {
           console.log(res);
 					if (res.data.code == 200) {

@@ -15,13 +15,13 @@
       <div class="setting">
         <font-awesome-icon icon="thermometer-half" size="2x" />目标温度
         <button @click="changeTargetTemperature(-1)">-</button>
-        <input type="number" v-model="targetTemperature" />
+        <input type="number" v-model="targetTemperature"  disabled />
         <button @click="changeTargetTemperature(1)">+</button>
       </div>
       <div class="setting">
         <font-awesome-icon icon="fan" size="2x" /> 风速控制
         <button @click="changeWindSpeed(-1)">-</button>
-        <input type="number" v-model="windSpeed" />
+        <input type="number" v-model="windSpeed"  disabled />
         <button @click="changeWindSpeed(1)">+</button>
       </div>
      
@@ -29,15 +29,21 @@
       <div class="setting">
         <font-awesome-icon icon="thermometer-half" size="2x" />运行时长
         <button @click="changeTargetDuration(-1)">-</button>
-        <input type="number" v-model="targetDuration" />
+        <input type="number" v-model="targetDuration" disabled  />
         <button @click="changeTargetDuration(1)">+</button>
       </div>
       <div class="setting">
             <font-awesome-icon icon="thermometer-half" size="2x" />额外费用 
             <button @click="changeAdditionalFee(-1)">-</button>
-            <input type="number" v-model="additionalFee" />
+            <input type="number" v-model="additionalFee"  @input="checkAdditionalFee" disabled/>
             <button @click="changeAdditionalFee(1)">+</button>
       </div>
+    
+
+
+
+
+
         模式
         <select v-model="mode" @change="modeChanged">
           <option value="">选择一种模式</option>
@@ -56,7 +62,7 @@
 </template>
 
 <script>
-import axios from 'axios';  // 确保 axios 正确引用
+import axios from 'axios';  // Ensure axios is correctly imported
 
 export default {
   name: 'App',
@@ -85,31 +91,33 @@ export default {
       requestTime: '2007-04-05 03:29',
       targetTemperature: 18, 
       targetDuration: 1,
-      flag: 0, // 关闭空调
+      flag: 0,
       powerOnTime: null,
       mode: 1, 
       reason:-1,
+      // SSEurl:'http://localhost:9151/',//这里http://localhost:9151/要修改成服务器的url！！！！！！！！！！！
+      SSEurl:'http://10.29.150.77:9151/',
     }
   },
   mounted() {
     this.connectSSE();
     this.TempSSE();
-    axios.get("http://localhost:9151/user/userDetail") // 获取 userId
+    axios.get("/user/getUserInfo") // Updated URL
       .then(res => {
         this.userdata = res.data.data;
-        this.userId = this.userdata.id;
-        // alert("user ID:" + this.userId);
-        let url = `http://localhost:9151/user/conditioner/getRoomId?userId=${this.userId}`;
-        axios.get(url) // 获取 roomId
+        this.userId = this.userdata.id;       
+         let url = '/user/conditioner/getRoomId';
+        
+        axios.get(url) // Updated URL
           .then(res => {
             this.roomId = res.data.data;
             alert("UserId:" + this.userId + "\nRoomId:" + this.roomId);
             this.connectSSE();
             this.TempSSE();
-                    this.axios.get(`http://localhost:9151/user/conditioner/status?roomId=${this.roomId}`)
+                    axios.get(`/user/conditioner/status?roomId=${this.roomId}`) // Updated URL
                       .then(res => {
                         this.roomdata = res.data.data;
-                        if (res.data.data) {
+                        if (res.data.data.powerOn) {
                           this.windSpeed = this.roomdata.windSpeed;
                           this.mode = this.roomdata.mode;
                           this.windSpeed=this.roomdata.windSpeed;
@@ -119,7 +127,7 @@ export default {
                           alert("成功获取房间空调信息，该房间原先已打开空调！");
                         
                         } else {
-                          this.acPower = false;  // 如果没有空调信息，默认为关闭
+                          this.acPower = false;  
                           alert("该房间还没有开启空调");
                         }
 
@@ -145,27 +153,22 @@ export default {
   methods: {
     modeChanged(event){
       const newMode = event.target.value;
-      this.mode=newMode;//立即更新mode
+      this.mode=newMode;
       this.updateModeAndTurnOn(newMode);
-      // this.turnOnAirConditioner(newMode);
     },
     updateModeAndTurnOn(newMode) {
     this.mode = newMode;
     this.$nextTick(() => {
-      // this.turnOnAirConditioner(this.mode);
               if(this.power){
-                                  let url = `http://localhost:9151//user/conditioner/adjustMode?roomId=${this.roomId}&mode=${this.mode}`;
-                                  this.axios.post(url, { 
+                                  let url = `/user/conditioner/adjustMode?roomId=${this.roomId}&mode=${this.mode}`; // Updated URL
+                                  axios.post(url, { 
                                     mode: this.mode,
                                     roomId: this.roomId,
                                   })
                                   .then((res) => {
                                     if (res.data.code == 200) {
-                                     // alert("已成功发送调整模式，请稍等！");
-                                          if(this.reason===6){//用户主动关闭
-                                              console.log('已调整模式');
-                                            }
-                                    } else {
+                                    }
+                                    else {
                                       alert("调整模式失败");
                                     }
                                   })
@@ -174,20 +177,17 @@ export default {
   },
     changeTargetTemperature(step) {
       this.targetTemperature = Number(this.targetTemperature)+step;
-      if(this.power){//当空调开启时要向空发送调整参数的请求
-                      let url = `http://localhost:9151/user/conditioner/adjustTargetTemperature?targetTemperature=${this.setTemp}&roomId=${this.roomId}`;
+      if(this.power){
+                      let url = `/user/conditioner/adjustTargetTemperature?targetTemperature=${this.setTemp}&roomId=${this.roomId}`; // Updated URL
                     // this.setTemp--;
-                    this.axios.post(url, {
+                    axios.post(url, {
                       targetTemperature: this.targetTemperature,
                       roomId: this.roomId,
                     })
                     .then((res) => {
-                      if (res.data.code == 200) {
-                        // alert("已成功发送调温请求，请稍等！");
-                            if(this.reason===6){
-                                console.log('已调整目标温度');
-                              }
-                      } else {
+                      if (res.data.code === 200) {
+                      }
+                      else {
                         alert("调温失败");
                       }
                     })
@@ -195,22 +195,19 @@ export default {
     },
     changeWindSpeed(step) {
     
-      let newWindspeed = Number(this.windSpeed) + step; // 确保targetDuration是数字
+      let newWindspeed = Number(this.windSpeed) + step; 
       if (newWindspeed>= 1&&newWindspeed<=3) {
         this.windSpeed= Number(this.windSpeed )+ step;
               if(this.power){
-                          let url = `http://localhost:9151/user/conditioner/adjustWindSpeed?windSpeed=${this.windSpeed}&roomId=${this.roomId}`;
-                          this.axios.post(url, { 
+                          let url = `/user/conditioner/adjustWindSpeed?windSpeed=${this.windSpeed}&roomId=${this.roomId}`; // Updated URL
+                          axios.post(url, { 
                             windSpeed: this.windSpeed,
                             roomId: this.roomId,
                           })
                           .then((res) => {
                             if (res.data.code === 200) {
-                              //alert("已成功发送调整风速请求，请稍等！");
-                                  if(this.reason===6){//用户主动关闭
-                                      console.log('已调整风速');
-                                    }
-                            } else {
+                            }
+                            else {
                               alert("调风失败");
                             }
                           })
@@ -219,44 +216,42 @@ export default {
       }
    
     },
-    changeTargetDuration(step){//调整targetDuration
-
-      let newDuration = Number(this.targetDuration) + step; // 确保targetDuration是数字
+    changeTargetDuration(step){
+      let newDuration = Number(this.targetDuration) + step;
       if (newDuration >= 0) {
           this.targetDuration = newDuration;
                       if(this.power){
-                                let url = `http://localhost:9151/user/conditioner/adjustTargetDuration?targetDuration=${this.targetDuration}&roomId=${this.roomId}`;
-                                this.axios.post(url, { 
+                                let url = `/user/conditioner/adjustTargetDuration?targetDuration=${this.targetDuration}&roomId=${this.roomId}`; // Updated URL
+                                axios.post(url, { 
                                   targetDuration: this.targetDuration,
                                   roomId: this.roomId,
                                 })
                                 .then((res) => {
                                   if (res.data.code === 200) {
-                                    //alert("已成功发送调整运行时长请求，请稍等！");
-                                      if(this.reason===6){//调整参数
-                                          console.log('运行时长已调整');
-                                        }
-                                  } else {
+                                  }
+                                  else {
                                     alert("调整运行时长失败");
                                   }
                                 })
                     }
             }
     },
+   
     changeAdditionalFee(step) {
-      let newFee = Number(this.additionalFee) + step; // 确保additionalFee是数字
+      let newFee = Number(this.additionalFee) + step; 
     if (newFee >= 0) {
+
       this.additionalFee = newFee;
                           if(this.power){
-                                let url = `http://localhost:9151/user/conditioner/adjustAdditionalFee?additionalFee=${this.additionalFee}&roomId=${this.roomId}`;
-                                this.axios.post(url, { 
-                                  additionalFee: this.additionalFee,
+                                let url = `/user/conditioner/adjustAdditionalFee?additionalFee=${this.additionalFee}&roomId=${this.roomId}`; // Updated URL
+                                axios.post(url, { 
+                                  additionalFee: Number(this.additionalFee),
                                   roomId: this.roomId,
                                 })
                                 .then((res) => {
                                   if (res.data.code === 200) {
-                                  alert("已成功调整额外费用，请稍等！");
-                                  } else {
+                                  }
+                                  else {
                                     alert("调整费用失败！");
                                   }
                                 })
@@ -264,6 +259,22 @@ export default {
                     }
         }
     },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     toggleAirConditioner() {
       if (this.power) {
         this.turnOnAirConditioner();
@@ -276,56 +287,57 @@ export default {
       console.log("Attempting to turn on AC with mode:", this.mode);
     const now = new Date();
     const year = now.getFullYear();
-    const month = now.getMonth() + 1; // 月份从0开始，所以加1
+    const month = now.getMonth() + 1; 
     const day = now.getDate();
     const hour = now.getHours();
     const minute = now.getMinutes();
     const sec = now.getSeconds();
     
-    // const formattedTime = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-    //格式化为 'YYYY-MM-DD HH:MM' 的形式
-    const formattedTime = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    const url = `http://localhost:9151/user/conditioner/turnOn?roomId=${this.roomId}`;
+    const formattedTime = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    const url = `/user/conditioner/turnOn?roomId=${this.roomId}`;
     const requestBody = {
       roomId: this.roomId,
       userId: this.userId,
-      on: true, // 空调开启状态
+      powerOn: true,
       targetTemperature: this.targetTemperature,
       windSpeed: this.windSpeed,
       additionalFee: this.additionalFee,
-      targetDuration: this.targetDuration , // 用户输入的小时数转换为秒
+      targetDuration: this.targetDuration ,
       requestTime:formattedTime,
       mode:this.mode
     };
     axios.post(url, requestBody).then(response => {
       console.log("已经提出开启请求，请稍等！");
-      if(this.requestQueueSize===0){//可打开
+      if(this.requestQueueSize===0){
         console.log("已打开空调");
       }else{
         console.log("当前等待"+this.requestQueueSize+"人");
       }
     }).catch(error => {
       console.error("开启空调失败", error);
-      this.power = false; // 如果开启失败，重置开关状态
+      this.power = false; 
     });
   },
     turnOffAirConditioner() {
-      const url = `http://localhost:9151/user/conditioner/turnOff?roomId=${this.roomId}`;
+      const url = `/user/conditioner/turnOff?roomId=${this.roomId}`;
       axios.post(url).then(response => {
         console.log("用户主动关闭空调，请稍等");
-        if(this.reason===2){//用户主动关闭
+        if(this.reason===2){
           console.log('已关闭空调');
         }
       }).catch(error => {
         console.error("关闭空调失败", error);
-        this.power = true; // 如果关闭失败，重置开关状态
-        this.mode="";//关机以后重新将页面上的mode设置为null
+        this.power = true; 
+        this.mode="";
       });
     },
+    //
     //空调开关SSE通信
     connectSSE() {
     if (this.roomId) {
-        const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+        // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+        const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+        // alert(this.SSEurl+`user/conditioner/sse/subscribe?roomId=${this.roomId}`)
         eventSource.addEventListener('status-update', event => {
         console.log('New SSE Data:', event.data);
         const eventData = JSON.parse(event.data);
@@ -373,7 +385,8 @@ export default {
 //室温SSE
   TempSSE() {
     if (this.roomId) {
-      const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/nowTemp?roomId=${this.roomId}`);
+      const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/nowTemp?roomId=${this.roomId}`);
+      // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/nowTemp?roomId=${this.roomId}`);
       eventSource.addEventListener('temperature-update', event => {
         console.log('New TempSSE Data:', event.data);
         const eventData = JSON.parse(event.data);
@@ -395,7 +408,16 @@ export default {
   goback() {
         this.$router.push("/mine");
       },
+      checkAdditionalFee(){
+        if (this.additionalFee < 0) {
+        this.additionalFee = 0;
+      }
+      }
+
+
+
   },
+
   watch: {
     power(newValue, oldValue) {
       // 当电源开关变化时触发
@@ -404,30 +426,26 @@ export default {
   
     mode(newMode) {
     console.log("Mode changed to:", newMode);
-    if (this.power&&(this.mode==='1'||this.mode==='0')) { // 只有当电源打开时才执行
-      // this.turnOnAirConditioner(newMode);
-          let url = `http://localhost:9151/user/conditioner/adjustMode?roomId=${this.roomId}&mode=${this.mode}`;
-                          this.axios.post(url, { 
+    if (this.power&&(this.mode==='1'||this.mode==='0')) { 
+          let url = `/user/conditioner/adjustMode?roomId=${this.roomId}&mode=${this.mode}`; // Updated URL
+                          axios.post(url, { 
                             mode:this.mode,
                             roomId: this.roomId,
                           })
                           .then((res) => {
                             if (res.data.code == 200) {
-                              //alert("已成功发起调整模式，请稍等！");
-                            } else {
+                            }
+                            else {
                               alert("调整模式失败！");
                             }
                           })
 
     }
   }
-
   }
   }
 
 </script>
-
-
 
 <style>
 .control-panel {
@@ -503,4 +521,24 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(26px);
 }
+.setting {
+    /* display: flex; */
+    /* flex-direction: column; */
+}
+
+.input-with-button {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+}
+
+.confirm-button {
+    font-size: 0.8em;
+    margin-top: 5px;
+    width: fit-content;
+    height: fit-content;
+}
+
+
+
 </style>

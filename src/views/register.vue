@@ -160,8 +160,16 @@ export default {
                 if (valid) {
                     this.iconstyle = "el-icon-loading";
                     this.disabled = true;
-                    this.axios
-                        .post("http://localhost:9151/user/register", {
+                    // this.axios
+                    //     .post("http://localhost:9151/user/register", {
+                    //         email: this.register.email,
+                    //         userName: this.register.username,
+                    //         password: this.register.password,
+                    //         sex: this.register.gender,
+                    //         phone: this.register.phone,
+                    //     })
+                    this.$http
+                        .post("/user/register", {
                             email: this.register.email,
                             userName: this.register.username,
                             password: this.register.password,

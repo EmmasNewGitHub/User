@@ -90,7 +90,7 @@
   </div>
 </template>
 
-<script>
+<!-- <script>
 import footbar from "@/components/footbar.vue";
 
 export default {
@@ -143,10 +143,71 @@ export default {
     }
   },
   mounted() {
-    this.axios.get("http://localhost:9151/user/userDetail")
+    // this.axios.get("http://localhost:9151/user/userDetail")
+    this.axios.get("http://localhost:9151/user/getUserInfo")
       .then(res => {
         this.userdata = res.data.data;
        
+      })
+      .catch(res => {
+        console.log("失败" + res);
+      });
+  }
+};
+</script> -->
+<script>
+import footbar from "@/components/footbar.vue";
+
+export default {
+  data() {
+    return {
+      dialogVisible: false,
+      userdata: {}
+    };
+  },
+  components: {
+    footbar
+  },
+  methods: {
+    logoutBtn() {
+      this.dialogVisible = false;
+      this.$router.push("/login");
+      this.$http.get("/user/logout") // Updated URL
+        .then(res => {
+         
+        })
+        .catch(res => {
+          console.log("失败" + res);
+        });
+    },
+    checkACStatus() {
+      this.$http.get("/user/specificBill") // Updated URL
+        .then(res => {
+          if (res.data.code === 200) {
+            this.$message({
+              message: `连接成功，状态码：${res.data.code}，请稍等，即将为您跳转...`,
+              type: 'success'
+            });
+            setTimeout(() => {
+              this.$router.push('/myac');
+            }, 3000);
+          } else {
+            this.$message({
+              message: `连接失败，错误码：${res.data.code}`,
+              type: 'error'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('请求失败：', error);
+          this.$message.error(`请求失败，请稍后重试`);
+        });
+    }
+  },
+  mounted() {
+    this.$http.get("/user/getUserInfo") // Updated URL
+      .then(res => {
+        this.userdata = res.data.data;
       })
       .catch(res => {
         console.log("失败" + res);

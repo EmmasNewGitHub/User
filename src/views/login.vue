@@ -134,34 +134,64 @@ export default {
             this.iconstyle = "el-icon-loading";
             this.disabled = true;
 
-            this.axios
-                .post("http://localhost:9151/user/login", {
-                    email: this.login.email,
-                    password: this.login.password,
-                })
-                .then((res) => {
-                    if (res.data.code == 200) {
+            // this.axios
+            //     .post("http://localhost:9151/user/login", {
+            //         email: this.login.email,
+            //         password: this.login.password,
+            //     })
+            //     .then((res) => {
+            //         if (res.data.code == 200) {
+            //             this.iconstyle = "el-icon-check";
+            //             this.btnType = "success";
+                        
+            //             this.dialogVisible = true;  // 显示成功弹窗
+            //             //this.disabled = false;
+            //             setTimeout(() => {
+            //                 this.disabled = false;
+            //                 this.$store.commit("setFind");
+            //                //this.$router.push("/findroom");
+            //                 this.$router.push("/mine")
+            //             }, 2000);
+            //         } else {
+                        
+            //             this.failDialogVisible = true; // 显示登录失败弹窗
+            //             this.handleLoginError();
+            //             }
+            //     }).catch((e) => {
+            //         this.failDialogVisible = true; // 确保这里也设置显示失败弹窗
+            //         this.handleLoginError();
+                   
+            //     });
+            
+                this.$http({
+                    method: 'post',
+                    url: '/user/login',
+                    data: {
+                        email: this.login.email,
+                        password: this.login.password,
+                    }
+                }).then((res) => {
+                    if (res.data.code === 200) {
                         this.iconstyle = "el-icon-check";
                         this.btnType = "success";
                         
-                        this.dialogVisible = true;  // 显示成功弹窗
-                        //this.disabled = false;
+                        this.dialogVisible = true; 
                         setTimeout(() => {
                             this.disabled = false;
                             this.$store.commit("setFind");
-                           //this.$router.push("/findroom");
-                            this.$router.push("/mine")
+                            this.$router.push("/mine");
                         }, 2000);
                     } else {
-                        
-                        this.failDialogVisible = true; // 显示登录失败弹窗
+                        this.failDialogVisible = true;
                         this.handleLoginError();
-                        }
+                    }
                 }).catch((e) => {
-                    this.failDialogVisible = true; // 确保这里也设置显示失败弹窗
+                    this.failDialogVisible = true; 
                     this.handleLoginError();
-                   
                 });
+
+
+
         },
 
         handleLoginError() {

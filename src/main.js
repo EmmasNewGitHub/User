@@ -17,13 +17,13 @@ import './assets/font2/iconfont.css'
 import VueWechatTitle from 'vue-wechat-title';
 import router from './router';
 import './assets/css/custom.css';
-import './assets/font/iconfont.css'
-// import './assets/css/fontello.css';
-
+import './assets/font/iconfont.css';
 import feather from 'feather-icons';
-// import './assets/css/materialdesignicons.min.css'
 
-axios.defaults.withCredentials = true;
+import './http';
+
+
+Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false;
 Vue.use(ElementUI, { size: 'small', zIndex: 3000 });
