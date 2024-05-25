@@ -114,7 +114,7 @@ export default {
             this.roomId = res.data.data;
             alert("UserId:" + this.userId + "\nRoomId:" + this.roomId);
             this.connectSSE();
-            this.TempSSE();
+            // this.TempSSE();
                     axios.get(`/user/conditioner/status?roomId=${this.roomId}`) // Updated URL
                       .then(res => {
                         this.roomdata = res.data.data;
@@ -346,6 +346,7 @@ export default {
         this.requestQueueSize = eventData.source.requestQueueSize;
         this.reason=eventData.reason;
           //监控空调发来的关闭原因
+          if(this.controllerType=== "status-update"){//如果是开关机sse消息
             if (this.reason === 1) {
             this.power = false; // 设置空调为关闭状态
             this.acPower=false;
@@ -370,6 +371,10 @@ export default {
             else if(this.reason===6){
               alert("参数调整成功");
             }
+          }else{//如果发来的是temp-update
+            this.currentTemp=this.temperature;
+
+          }
       });
       eventSource.onmessage = event => {
         console.log('General SSE message:', event.data);
@@ -383,29 +388,29 @@ export default {
     }
   },
 
-//室温SSE
-  TempSSE() {
-    if (this.roomId) {
-      const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/subscribe?roomId=${this.roomId}`);
-      // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/subscribe?roomId=${this.roomId}`);
-      eventSource.addEventListener('temperature-update', event => {
-        console.log('New TempSSE Data:', event.data);
-        const eventData = JSON.parse(event.data);
-        this.currentTemp=this.currentTemperature = eventData.temperature;
-      });
+// //室温SSE
+//   TempSSE() {
+//     if (this.roomId) {
+//       const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+//       // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+//       eventSource.addEventListener('temperature-update', event => {
+//         console.log('New TempSSE Data:', event.data);
+//         const eventData = JSON.parse(event.data);
+//         this.currentTemp=this.currentTemperature = eventData.temperature;
+//       });
 
-      eventSource.onmessage = event => {
-        console.log('General TempSSE message:', event.data);
-      };
+//       eventSource.onmessage = event => {
+//         console.log('General TempSSE message:', event.data);
+//       };
 
-      eventSource.onerror = error => {
-        console.error('TempSSE failed:', error);
-        eventSource.close(); 
-      };
-    } else {
-      console.error('Room ID is undefined. Cannot connect to TempSSE.');
-    }
-  },
+//       eventSource.onerror = error => {
+//         console.error('TempSSE failed:', error);
+//         eventSource.close(); 
+//       };
+//     } else {
+//       console.error('Room ID is undefined. Cannot connect to TempSSE.');
+//     }
+//   },
   goback() {
         this.$router.push("/mine");
       },
