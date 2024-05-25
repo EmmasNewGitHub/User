@@ -101,7 +101,7 @@ export default {
   },
   mounted() {
     this.connectSSE();
-    this.TempSSE();
+   
     // axios.get("/user/getUserInfo") // Updated URL
     axios.get("/user/userDetail")
       .then(res => {
@@ -345,6 +345,7 @@ export default {
         this.serviceQueueLength = eventData.source.serviceQueueLength;
         this.requestQueueSize = eventData.source.requestQueueSize;
         this.reason=eventData.reason;
+        this.temperature=eventData.temperature;
           //监控空调发来的关闭原因
           if(this.controllerType=== "status-update"){//如果是开关机sse消息
             if (this.reason === 1) {
@@ -372,7 +373,7 @@ export default {
               alert("参数调整成功");
             }
           }else{//如果发来的是temp-update
-            this.currentTemp=this.temperature;
+            this.currentTemp=this.currentTemperature=this.temperature;
 
           }
       });
