@@ -102,11 +102,12 @@ export default {
   mounted() {
     this.connectSSE();
     this.TempSSE();
-    axios.get("/user/getUserInfo") // Updated URL
+    // axios.get("/user/getUserInfo") // Updated URL
+    axios.get("/user/userDetail")
       .then(res => {
         this.userdata = res.data.data;
         this.userId = this.userdata.id;       
-         let url = '/user/conditioner/getRoomId';
+        let url = '/user/conditioner/getRoomId';
         
         axios.get(url) // Updated URL
           .then(res => {
@@ -385,8 +386,8 @@ export default {
 //室温SSE
   TempSSE() {
     if (this.roomId) {
-      const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/nowTemp?roomId=${this.roomId}`);
-      // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/nowTemp?roomId=${this.roomId}`);
+      const eventSource = new EventSource(this.SSEurl+`user/conditioner/sse/subscribe?roomId=${this.roomId}`);
+      // const eventSource = new EventSource(`http://localhost:9151/user/conditioner/sse/subscribe?roomId=${this.roomId}`);
       eventSource.addEventListener('temperature-update', event => {
         console.log('New TempSSE Data:', event.data);
         const eventData = JSON.parse(event.data);
